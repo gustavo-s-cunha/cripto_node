@@ -1,0 +1,27 @@
+footer {
+  height: 130px;
+  padding: 0 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e3e3e3;
+}
+
+.footer-green {
+  color: #1ba44b;
+  font-size: 206%;
+}
+
+.footer-green-upper {
+  margin-top: 0.3rem;
+  text-transform: uppercase;
+  color: #004b3b;
+  font-size: 1.2rem;
+}
+
+.footer-rigth {
+  color: #939393;
+  font-weight: 300;
+  line-height: 21px;
+  text-align: right;
+}
