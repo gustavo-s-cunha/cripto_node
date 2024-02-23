@@ -9,7 +9,7 @@ footer {
 
 .footer-green {
   color: #1ba44b;
-  font-size: 206%;
+  font-size: 1.5rem;
 }
 
 .footer-green-upper {
@@ -20,8 +20,22 @@ footer {
 }
 
 .footer-rigth {
-  color: #939393;
-  font-weight: 300;
-  line-height: 21px;
+  color: #0603b4d2;
   text-align: right;
+  font-size: 1.2rem;
+}
+
+.overflow-auto {
+  overflow: auto !important;
+}
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+.fixed-bottom {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1030;
 }

@@ -4,7 +4,7 @@ import { Box, Button, Container, Grid, Paper, Typography } from "@mui/material";
 
 export default function Main() {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ display: "flex" }}>
       <Container component="main" maxWidth="lg" sx={{ mt: 0 }}>
         <Paper variant="" sx={{ my: { xs: 1, md: 1 }, p: { xs: 2, md: 1 } }}>
           <Box
@@ -66,15 +66,6 @@ export default function Main() {
               </Link>
             </div>
           </Grid>
-          <Box
-            sx={{
-              mt: 4,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-          </Box>
         </Paper>
       </Container>
     </div>

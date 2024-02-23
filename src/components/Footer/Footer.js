@@ -3,17 +3,13 @@ import "./style.css";
 
 function Footer() {
   return (
-    <footer>
+    <footer className="fixed-bottom overflow-hidden" style={{ maxHeight: "50px", backgroundColor: 'white' }}>
       <div className="footer-left">
-        <div className="footer-green">
-          Analise da tabela: 
-        </div>
-        <div className="footer-green-upper">
-          coinext
-        </div>
+        <span className="footer-green">Analise da tabela:</span>
+        <span className="footer-green-upper" style={{marginLeft: '10px'}}>coinext</span>
       </div>
       <div className="footer-rigth">
-        <p> Footer qualquer </p>
+        <p> Att: <a href="https://github.com/gustavo-s-cunha" target="none" rel="gitHub"> Gustavo_s_c</a> </p>
       </div>
     </footer>
   );
