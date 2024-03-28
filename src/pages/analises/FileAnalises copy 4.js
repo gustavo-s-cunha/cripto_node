@@ -23,11 +23,6 @@ export default function FileAnalises() {
       p1, p2,..., pn: pesos
       x1, x2,...,xn: valores dos dados
     */
-   /*
-      Mp = (valor + ((p1 * x1) + (p2 * x2) + (pn * xn))) / (qtd + ( p1 + p2 + pn))
-      Mp = (valor - ((p1 * x1) + (p2 * x2) + (pn * xn))) / (qtd - ( p1 + p2 + pn))
-    
-    */
   };
 
   const calcPotencia = (x) => {
@@ -212,34 +207,81 @@ export default function FileAnalises() {
         };
       }
 
+      // qtd_trans + taxa -> valor_trans
+      // 1                -> x
+      // x = valor_trans / (qtd_trans + taxa)
       fields.val_trans = arr_datas[fields.data].brl / arr_datas[fields.data].qtd;
-
-      //data_table[moeda_t].qtd_moeda --- data_table[moeda_t].val_medio
-      //fields.entrada                --- fields.val_trans
-      //(data_table[moeda_t].qtd_moeda + fields.entrada) ---> x
-
-      // (data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans) / (data_table[moeda_t].qtd_moeda + fields.entrada)
 
       if (/BRL.*/.test(moeda)) {
         data_table[moeda_t].total_investido += fields.saida;
         data_table[moeda_t].total_retorno += fields.entrada;
 
         data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'valor']);
+      } else if (fields.transacao != 'Fee') {
+        //valor -> (fields.saida+'').replace(/(.*)e-(.*)/, '$1')
+        //potencia -> (fields.saida+'').replace(/(.*)e-(.*)/, '$2')
 
-      } else {
-        var aux_val_m = 0;
         if (fields.entrada > 0) {
-          aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
-          aux_val_m = data_table[moeda_t].val_medio + aux_val_m;
+          fields.val_medio = (data_table[moeda_t].val_medio + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
 
+          data_table[moeda_t].val_medio = fields.val_medio;
           data_table[moeda_t].qtd_moeda += fields.entrada;
-        } else {
-          aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
-          aux_val_m = data_table[moeda_t].val_medio - aux_val_m;
 
+        } else {
+          fields.val_medio = (data_table[moeda_t].val_medio - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
+
+          data_table[moeda_t].val_medio = fields.val_medio;
           data_table[moeda_t].qtd_moeda -= fields.saida;
         }
-        fields.val_medio = aux_val_m;
+
+        data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
+        
+        data_table[moeda].rows.push(fields);
+
+      } else { // taxa
+        //var test = calcPotencia(fields.saida);
+        //console.log(test);
+        fields.val_medio = (data_table[moeda_t].val_medio - (fields.saida * data_table[moeda_t].val_medio)) / (data_table[moeda_t].qtd_moeda - fields.saida);
+
+        data_table[moeda_t].val_medio = fields.val_medio;
+        data_table[moeda_t].qtd_moeda -= fields.saida;
+
+        data_table[moeda_t].media.push([fields.saida, 'qtd']);
+        data_table[moeda_t].media.push([data_table[moeda_t].val_medio, 'valor']);
+        
+        data_table[moeda].rows.push(fields);
+      }
+      /*
+      if (/BRL./.test(moeda)) {
+        data_table[moeda_t].total_investido += fields.saida;
+        data_table[moeda_t].total_retorno += fields.entrada;
+
+        data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'valor']);
+
+      } else if (data_table[moeda_t].val_medio > 0) {
+        if (fields.entrada > 0) {
+          fields.val_medio = ((data_table[moeda_t].qtd_moeda + fields.entrada) * data_table[moeda_t].val_medio) / data_table[moeda_t].qtd_moeda;
+          data_table[moeda_t].qtd_moeda += fields.entrada;
+        } else {
+          fields.val_medio = ((data_table[moeda_t].qtd_moeda - fields.saida) * data_table[moeda_t].val_medio) / data_table[moeda_t].qtd_moeda;
+          data_table[moeda_t].qtd_moeda -= fields.saida;
+        }
+        data_table[moeda_t].val_medio = fields.val_medio;
+
+        if (fields.transacao != 'Fee') {
+          data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
+        }
+        data_table[moeda].rows.push(fields);
+
+      } else {
+        if (fields.entrada > 0) {
+          fields.val_medio = (data_table[moeda_t].val_medio + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
+          data_table[moeda_t].qtd_moeda += fields.entrada;
+
+        } else {
+          fields.val_medio = (data_table[moeda_t].val_medio - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
+          data_table[moeda_t].qtd_moeda -= fields.saida;
+        }
         data_table[moeda_t].val_medio = fields.val_medio;
 
         if (fields.transacao != 'Fee') {
@@ -247,6 +289,7 @@ export default function FileAnalises() {
         }
         data_table[moeda].rows.push(fields);
       }
+       */
     }
     //console.log('---- data_table ----');
     //console.log(data_table);

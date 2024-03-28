@@ -23,30 +23,7 @@ export default function FileAnalises() {
       p1, p2,..., pn: pesos
       x1, x2,...,xn: valores dos dados
     */
-   /*
-      Mp = (valor + ((p1 * x1) + (p2 * x2) + (pn * xn))) / (qtd + ( p1 + p2 + pn))
-      Mp = (valor - ((p1 * x1) + (p2 * x2) + (pn * xn))) / (qtd - ( p1 + p2 + pn))
-    
-    */
   };
-
-  const calcPotencia = (x) => {
-    if (Math.abs(x) < 1.0) {
-      var e = parseInt(x.toString().split('e-')[1]);
-      if (e) {
-          x *= Math.pow(10,e-1);
-          x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
-      }
-    } else {
-      var e = parseInt(x.toString().split('+')[1]);
-      if (e > 20) {
-          e -= 20;
-          x /= Math.pow(10,e);
-          x += (new Array(e+1)).join('0');
-      }
-    }
-    return x;
-  }
 
   function formatValue(value) {
     var aux_value = value;
@@ -147,6 +124,7 @@ export default function FileAnalises() {
         saida: parseFloat(line[8] || '0'),
         val_trans: 0,
         val_medio: 0,
+        total: 0,
         tipo: '',
         balanco: parseFloat(line[13] || '0'),
       };
@@ -168,12 +146,12 @@ export default function FileAnalises() {
       if (fields.transacao == "Other") {
         if (line[9] == "Deposit") {
           fields.tipo = 'Deposito';
-          data_table[moeda].total_investido += fields.entrada;
         } else {
           fields.tipo = 'Saque';
-          data_table[moeda].total_retorno += fields.saida;
         }
 
+        fields.total += fields.entrada;
+        fields.total -= fields.saida;
         data_table[moeda].rows.push(fields);
         continue;
 
@@ -181,8 +159,8 @@ export default function FileAnalises() {
         fields.tipo = 'taxa'
         if (/Other/.test(arr_datas[fields.data].transacao)) {
           // taxa referente ao saque
-          data_table[moeda].total_retorno += fields.entrada;
-
+          fields.total += fields.entrada;
+          fields.total -= fields.saida;
           data_table[moeda].rows.push(fields);
           continue;
         }
@@ -212,39 +190,34 @@ export default function FileAnalises() {
         };
       }
 
+      // qtd_trans + taxa -> valor_trans
+      // 1                -> x
+      // x = valor_trans / (qtd_trans + taxa)
       fields.val_trans = arr_datas[fields.data].brl / arr_datas[fields.data].qtd;
-
-      //data_table[moeda_t].qtd_moeda --- data_table[moeda_t].val_medio
-      //fields.entrada                --- fields.val_trans
-      //(data_table[moeda_t].qtd_moeda + fields.entrada) ---> x
-
-      // (data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans) / (data_table[moeda_t].qtd_moeda + fields.entrada)
 
       if (/BRL.*/.test(moeda)) {
         data_table[moeda_t].total_investido += fields.saida;
         data_table[moeda_t].total_retorno += fields.entrada;
 
+        fields.total += fields.entrada;
+        fields.total -= fields.saida;
+
         data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'valor']);
-
       } else {
-        var aux_val_m = 0;
         if (fields.entrada > 0) {
-          aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
-          aux_val_m = data_table[moeda_t].val_medio + aux_val_m;
-
           data_table[moeda_t].qtd_moeda += fields.entrada;
         } else {
-          aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
-          aux_val_m = data_table[moeda_t].val_medio - aux_val_m;
-
-          data_table[moeda_t].qtd_moeda -= fields.saida;
         }
-        fields.val_medio = aux_val_m;
-        data_table[moeda_t].val_medio = fields.val_medio;
+        data_table[moeda_t].qtd_moeda -= fields.saida;
+
+        //fields.val_medio = (arr_datas[fields.data].qtd * arr_datas[fields.data].brl) / arr_datas[fields.data].qtd;
+        fields.val_medio = (arr_datas[fields.data].qtd * fields.val_trans) / arr_datas[fields.data].qtd;
+        data_table[moeda_t].val_medio -= fields.saida;
 
         if (fields.transacao != 'Fee') {
           data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
         }
+
         data_table[moeda].rows.push(fields);
       }
     }
@@ -301,38 +274,36 @@ export default function FileAnalises() {
       </Paper>
       {selectedFile !== null && (
         <ExcelImport file={selectedFile} onImport={handleAnalises} />
+        /*<Box sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => {
+              handleAnalises();
+            }}
+          >
+            Analisar tabela
+          </Button>
+        </Box>*/
       )}
-      {isLoading ? ( <>
+      {isLoading && (
         <img
           src="/assets/loader.svg"
           height={100}
           style={{ marginTop: "2rem" }}
           alt="loader"
-        /> 
-      </>) : (<>
+        />
+      )}
+      {Object.keys(data).length > 0 && (<>
         {Object.keys(data).map((dat, rowIndex) => (<>
           <Divider sx={{ mt: 3, mb: 1, borderColor: green[700] }} />
-          <Grid container key={dat + '_G1_' + rowIndex} sx={{ padding: 1, maxWidth: '90%' , maxHeight: '400px', overflow: 'auto' }} >
-            <Grid container key={dat + '_G2_' + rowIndex} spacing={3}>
-              <Grid item key={dat + '_GT0_' + rowIndex} xs={1} md={1}>
-              </Grid>
-              <Grid item key={dat + '_GT_' + rowIndex} xs={2} md={2}>
-                <Typography key={dat + '_T_' + rowIndex} >
+          <Grid container key={dat + '_G1_' + rowIndex} sx={{ padding: 1, maxHeight: '400px', overflow: 'auto' }} >
+            <Grid item key={dat + '_G2_' + rowIndex} xs={12} md={12}>
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", }} >
+                <Typography key={dat + '_T_' + rowIndex} variant="h5" gutterBottom>
                   <strong>{dat}</strong>
                 </Typography>
-              </Grid>
-              <Grid item key={dat + '_GT2_' + rowIndex} xs={4} md={4} sx={{ textAlign: "left", }}>
-                <Typography key={dat + '_T2_' + rowIndex} >
-                  Qtd: {data[dat].qtd_moeda}<br/>
-                  Media: {formatValue(data[dat].val_medio)}
-                </Typography>
-              </Grid>
-              <Grid item key={dat + '_GT21_' + rowIndex} xs={4} md={4} sx={{ textAlign: "left", }}>
-                <Typography key={dat + '_T21_' + rowIndex} >
-                  Investido: {formatValue(data[dat].total_investido)}<br/>
-                  Retorno: {formatValue(data[dat].total_retorno)}
-                </Typography>
-              </Grid>
+              </Box>
             </Grid>
             <Grid item key={dat + '_G3_' + rowIndex} xs={1} md={1}/>
             <Grid item key={dat + '_G4_' + rowIndex} xs={10} md={10}>
@@ -344,9 +315,10 @@ export default function FileAnalises() {
                       <TableCell align="center">Data</TableCell>
                       <TableCell align="center">Entrada</TableCell>
                       <TableCell align="center">Saída</TableCell>
+                      <TableCell align="center">Valor</TableCell>
+                      <TableCell align="center">Total</TableCell>
                       {dat != 'BRL' && <><TableCell align="center">Val. Transação</TableCell></>}
                       {dat != 'BRL' && <><TableCell align="center">Val. Medio</TableCell></>}
-                      <TableCell align="center">Saldo</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -356,9 +328,10 @@ export default function FileAnalises() {
                         <TableCell align="right">{line.data}</TableCell>
                         <TableCell align="right">{line.entrada}</TableCell>
                         <TableCell align="right">{line.saida}</TableCell>
-                        {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_trans)}</TableCell></>}
-                        {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_medio)}</TableCell></>}
-                        <TableCell align="right">{line.balanco}</TableCell>
+                        <TableCell align="right">{line.valor}</TableCell>
+                        <TableCell align="right">{line.total}</TableCell>
+                        {dat != 'BRL' && <><TableCell align="right">{line.val_trans}</TableCell></>}
+                        {dat != 'BRL' && <><TableCell align="right">{line.val_medio}</TableCell></>}
                       </TableRow>
                     ))}
                   </TableBody>
