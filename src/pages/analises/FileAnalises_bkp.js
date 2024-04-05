@@ -210,6 +210,11 @@ export default function FileAnalises() {
       // qtd_trans + taxa -> valor_trans
       // 1                -> x
       // x = valor_trans / (qtd_trans + taxa)
+
+      //data_table[moeda_t].qtd_moeda --- data_table[moeda_t].val_medio
+      //fields.entrada                --- fields.val_trans
+      //(data_table[moeda_t].qtd_moeda + fields.entrada) ---> x
+
       fields.val_trans = arr_datas[fields.data].brl / arr_datas[fields.data].qtd;
 
       if (/BRL.*/.test(moeda)) {
@@ -222,12 +227,18 @@ export default function FileAnalises() {
         //potencia -> (fields.saida+'').replace(/(.*)e-(.*)/, '$2')
 
         if (fields.entrada > 0) {
+          //aux_val_m = (data_table[moeda_t].val_medio + (fields.entrada * fields.val_trans) / (data_table[moeda_t].qtd_moeda + fields.entrada))/2;
+          //aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
+          //aux_val_m = data_table[moeda_t].val_medio + aux_val_m;
           fields.val_medio = (data_table[moeda_t].val_medio + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
 
           data_table[moeda_t].val_medio = fields.val_medio;
           data_table[moeda_t].qtd_moeda += fields.entrada;
 
         } else {
+          //aux_val_m = (data_table[moeda_t].val_medio - (fields.saida * fields.val_trans) / (data_table[moeda_t].qtd_moeda - fields.saida))/2;
+          //aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
+          //aux_val_m = data_table[moeda_t].val_medio - aux_val_m;
           fields.val_medio = (data_table[moeda_t].val_medio - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
 
           data_table[moeda_t].val_medio = fields.val_medio;
@@ -241,6 +252,9 @@ export default function FileAnalises() {
       } else { // taxa
         //var test = calcPotencia(fields.saida);
         //console.log(test);
+        //aux_val_m = (data_table[moeda_t].val_medio - (fields.saida * fields.val_trans) / (data_table[moeda_t].qtd_moeda - fields.saida))/2;
+        //aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
+        //aux_val_m = data_table[moeda_t].val_medio - aux_val_m;
         fields.val_medio = (data_table[moeda_t].val_medio - (fields.saida * data_table[moeda_t].val_medio)) / (data_table[moeda_t].qtd_moeda - fields.saida);
 
         data_table[moeda_t].val_medio = fields.val_medio;

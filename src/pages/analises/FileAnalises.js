@@ -104,14 +104,16 @@ export default function FileAnalises() {
     let arr_datas = {};
     var line;
     var moeda;
-    var data;
+    var data, aux_data;
     let fields = {};
 
     // agrupa os lançamentos por data
     // primeira linha é o cabeçalho
     for (var i = 1, tam = jsonData.length; i < tam; i++) {
       line = jsonData[i];
-      data = dayjs(line[3]).format('DD/MM/YYYY HH:mm');
+      aux_data = line[3].replace(/T/, ' ');
+      aux_data = aux_data.replace(/Z/, '');
+      data = dayjs(aux_data).format('DD/MM/YYYY HH:mm');
       moeda = line[6];
       var valor = parseFloat(line[7] || line[8]);
 
@@ -139,9 +141,11 @@ export default function FileAnalises() {
 
     for (var i = 1, tam = jsonData.length; i < tam; i++) {
       line = jsonData[i];
+      aux_data = line[3].replace(/T/, ' ');
+      aux_data = aux_data.replace(/Z/, '');
       fields = {
         id: line[1],
-        data: dayjs(line[3]).format('DD/MM/YYYY HH:mm'),
+        data: dayjs(aux_data).format('DD/MM/YYYY HH:mm'),
         transacao: line[2],
         entrada: parseFloat(line[7] || '0'),
         saida: parseFloat(line[8] || '0'),
@@ -149,6 +153,7 @@ export default function FileAnalises() {
         val_medio: 0,
         tipo: '',
         balanco: parseFloat(line[13] || '0'),
+        balanco_qtd: 0,
       };
       moeda = line[6];
 
@@ -161,6 +166,8 @@ export default function FileAnalises() {
           total_investido: 0,
           total_retorno: 0,
           val_medio: 0,
+          media_pond_sup: 0,
+          media_pond_inf: 0,
           media: [],
         };
       }
@@ -208,6 +215,8 @@ export default function FileAnalises() {
           total_investido: 0,
           total_retorno: 0,
           val_medio: 0,
+          media_pond_sup: 0,
+          media_pond_inf: 0,
           media: [],
         };
       }
@@ -218,8 +227,6 @@ export default function FileAnalises() {
       //fields.entrada                --- fields.val_trans
       //(data_table[moeda_t].qtd_moeda + fields.entrada) ---> x
 
-      // (data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans) / (data_table[moeda_t].qtd_moeda + fields.entrada)
-
       if (/BRL.*/.test(moeda)) {
         data_table[moeda_t].total_investido += fields.saida;
         data_table[moeda_t].total_retorno += fields.entrada;
@@ -229,19 +236,26 @@ export default function FileAnalises() {
       } else {
         var aux_val_m = 0;
         if (fields.entrada > 0) {
-          aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].qtd_moeda + fields.entrada);
-          aux_val_m = data_table[moeda_t].val_medio + aux_val_m;
+          aux_val_m = (data_table[moeda_t].media_pond_sup + (fields.entrada * fields.val_trans)) / (data_table[moeda_t].media_pond_inf + fields.entrada);
 
+          data_table[moeda_t].media_pond_sup += (fields.entrada * fields.val_trans);
+          data_table[moeda_t].media_pond_inf += fields.entrada;
           data_table[moeda_t].qtd_moeda += fields.entrada;
         } else {
-          aux_val_m = ((data_table[moeda_t].qtd_moeda * data_table[moeda_t].val_medio) - (fields.saida * fields.val_trans)) / (data_table[moeda_t].qtd_moeda - fields.saida);
-          aux_val_m = data_table[moeda_t].val_medio - aux_val_m;
+          aux_val_m = (data_table[moeda_t].media_pond_sup - (fields.saida * fields.val_trans)) / (data_table[moeda_t].media_pond_inf - fields.entrada);
 
+          if (fields.tipo == 'venda' && fields.val_trans > data_table[moeda_t].val_medio) {
+            aux_val_m = data_table[moeda_t].val_medio;
+          } else {
+            data_table[moeda_t].media_pond_sup -= (fields.saida * fields.val_trans);
+            data_table[moeda_t].media_pond_inf -= fields.saida;
+          }
           data_table[moeda_t].qtd_moeda -= fields.saida;
         }
         fields.val_medio = aux_val_m;
         data_table[moeda_t].val_medio = fields.val_medio;
 
+        fields.balanco_qtd = data_table[moeda_t].qtd_moeda;
         if (fields.transacao != 'Fee') {
           data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
         }
@@ -358,7 +372,7 @@ export default function FileAnalises() {
                         <TableCell align="right">{line.saida}</TableCell>
                         {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_trans)}</TableCell></>}
                         {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_medio)}</TableCell></>}
-                        <TableCell align="right">{line.balanco}</TableCell>
+                        <TableCell align="right" title={"Aprox: " + line.balanco_qtd}>{line.balanco}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
