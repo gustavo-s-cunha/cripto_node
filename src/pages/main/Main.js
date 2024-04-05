@@ -61,7 +61,7 @@ export default function Main() {
                   size="large"
                   sx={{ mt: 2 }}
                 >
-                  Proceguir para análise
+                  Prosseguir para análise
                 </Button>
               </Link>
             </div>

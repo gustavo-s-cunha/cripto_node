@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { Box, Button, Container, Divider, Grid, Input, Paper, } from "@mui/material";
+import { Box, Button, Divider, Grid, ListItem, ListItemText, Paper, } from "@mui/material";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import dayjs from "dayjs";
@@ -227,6 +227,12 @@ export default function FileAnalises() {
       //fields.entrada                --- fields.val_trans
       //(data_table[moeda_t].qtd_moeda + fields.entrada) ---> x
 
+      console.log('fields');
+      console.log(fields);
+      console.log('moeda_t');
+      console.log(moeda_t);
+      console.log('data_table[moeda_t]');
+      console.log(data_table[moeda_t]);
       if (/BRL.*/.test(moeda)) {
         data_table[moeda_t].total_investido += fields.saida;
         data_table[moeda_t].total_retorno += fields.entrada;
@@ -252,6 +258,9 @@ export default function FileAnalises() {
           }
           data_table[moeda_t].qtd_moeda -= fields.saida;
         }
+        console.log('novo val_medio');
+        console.log(aux_val_m);
+
         fields.val_medio = aux_val_m;
         data_table[moeda_t].val_medio = fields.val_medio;
 
@@ -259,12 +268,15 @@ export default function FileAnalises() {
         if (fields.transacao != 'Fee') {
           data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
         }
+        console.log('fields');
+        console.log(fields);
+        console.log('data_table[moeda_t]');
+        console.log(data_table[moeda_t]);
         data_table[moeda].rows.push(fields);
       }
     }
-    //console.log('---- data_table ----');
-    //console.log(data_table);
-
+    console.log('\nfim analise: ---------------------');
+    console.log(data_table);
     toast.success("Análise concluida!");
     setTimeout(() => {
       setIsLoading(false);
@@ -281,36 +293,57 @@ export default function FileAnalises() {
     <div className="content-wrapper bg-white">
       <Paper variant="" sx={{ my: { xs: 1, md: 1 }, p: { xs: 2, md: 1 } }} style={{ paddingTop: "16px" }} >
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", }} >
-          <Box sx={{ mt: 1, fontSize: "1.2rem" }}>
+          <Box sx={{ mt: 1, mb: 1, fontSize: "1.2rem" }}>
             <Typography variant="h4" gutterBottom>
-              <strong>Análise da tabela</strong>
+              <strong>Análise da tabela de transações</strong>
             </Typography>
           </Box>
-          <div
-            onDrop={handleDrop}
-            onDragOver={preventDefault}
-            className="drop-container"
-            style={{
-              maxWidth: '600px',
-              backgroundColor: (selectedFile !== null ? "#dbffdd" : "none")
-            }}
-          >
-            <CloudUpload sx={{ fontSize: 50, color: "#9c9c9c" }} />
-            <Typography variant="body1">
-              Arraste e solte um arquivo aqui ou clique para selecionar
-            </Typography>
-            <Button variant="contained" color="success" component="label"  onChange={handleFileChange}>
-              Selecionar (CSV ou XLSX)
-              <input type="file" hidden accept=".csv, .xlsx"/>
-            </Button>
+          <Grid container spacing={3} >
+            <Grid item xs={1} sm={1}/>
+            <Grid item xs={6} sm={6}>
+              <div
+                onDrop={handleDrop}
+                onDragOver={preventDefault}
+                className="drop-container"
+                style={{
+                  maxWidth: '600px',
+                  backgroundColor: (selectedFile !== null ? "#dbffdd" : "none")
+                }}
+              >
+                <CloudUpload sx={{ fontSize: 50, color: "#9c9c9c" }} />
+                <Typography variant="body1">
+                  Arraste e solte um arquivo aqui ou clique para selecionar
+                </Typography>
+                <Button variant="contained" color="success" component="label"  onChange={handleFileChange}>
+                  Selecionar (CSV ou XLSX)
+                  <input type="file" hidden accept=".csv, .xlsx"/>
+                </Button>
 
-            <Typography variant="body1" style={{ textAlign: "center", margin: "4px 0", fontSize: "1.4rem", }} >
-              <strong>. . .</strong>
-            </Typography>
-            <Typography variant="body1">
-              {selectedFile !== null ? `Arquivo selecionado: ${selectedFile.name}` : "Nenhum arquivo selecionado."}
-            </Typography>
-          </div>
+                <Typography variant="body1" style={{ textAlign: "center", margin: "4px 0", fontSize: "1.4rem", }} >
+                  <strong>. . .</strong>
+                </Typography>
+                <Typography variant="body1">
+                  {selectedFile !== null ? `Arquivo selecionado: ${selectedFile.name}` : "Nenhum arquivo selecionado."}
+                </Typography>
+              </div>
+            </Grid>
+            <Grid item xs={5} sm={5}>
+              <Grid item xs={12} sm={12}>
+                <ListItem>
+                  <ListItemText 
+                    primary="A tabela geralmente tem o nome de:"
+                    secondary={"Sob demanda Transaction de <data de> to <data até>.csv"} />
+                </ListItem>
+              </Grid>
+              <Grid item xs={12} sm={12}>
+                <ListItem>
+                  <ListItemText 
+                    primary="Exemplo:" 
+                    secondary={"Sob demanda Transaction de 2021-01-05 to 2024-03-27.csv"} />
+                </ListItem>
+              </Grid>
+            </Grid>
+          </Grid>
         </Box>
       </Paper>
       {selectedFile !== null && (
