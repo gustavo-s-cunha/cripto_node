@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { Box, Button, Divider, Grid, ListItem, ListItemText, Paper, } from "@mui/material";
+import { Box, Button, Divider, Grid, ListItem, ListItemText, Paper, Tooltip} from "@mui/material";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import dayjs from "dayjs";
@@ -164,6 +164,9 @@ export default function FileAnalises() {
           rows: [],
           qtd_moeda: 0,
           total_investido: 0,
+          t_investido: 0,
+          total_taxas: 0,
+          total_cash_back: 0,
           total_retorno: 0,
           val_medio: 0,
           media_pond_sup: 0,
@@ -176,9 +179,15 @@ export default function FileAnalises() {
         if (line[9] == "Deposit") {
           fields.tipo = 'Deposito';
           data_table[moeda].total_investido += fields.entrada;
-        } else {
+          data_table[moeda].t_investido += fields.entrada;
+        } else if (line[9] == "Withdraw") {
           fields.tipo = 'Saque';
           data_table[moeda].total_retorno += fields.saida;
+        } else {
+          fields.tipo = 'Cash-back';
+          //data_table[moeda].total_retorno += fields.entrada;
+          data_table[moeda].total_investido += fields.entrada;
+          data_table[moeda].total_cash_back += fields.entrada;
         }
 
         data_table[moeda].rows.push(fields);
@@ -188,7 +197,9 @@ export default function FileAnalises() {
         fields.tipo = 'taxa'
         if (/Other/.test(arr_datas[fields.data].transacao)) {
           // taxa referente ao saque
-          data_table[moeda].total_retorno += fields.entrada;
+          data_table[moeda].total_retorno += fields.saida;
+          data_table[moeda].total_taxas += fields.saida;
+          data_table[moeda].t_investido -= fields.saida;
 
           data_table[moeda].rows.push(fields);
           continue;
@@ -213,6 +224,9 @@ export default function FileAnalises() {
           rows: [],
           qtd_moeda: 0,
           total_investido: 0,
+          t_investido: 0,
+          total_taxas: 0,
+          total_cash_back: 0,
           total_retorno: 0,
           val_medio: 0,
           media_pond_sup: 0,
@@ -227,14 +241,14 @@ export default function FileAnalises() {
       //fields.entrada                --- fields.val_trans
       //(data_table[moeda_t].qtd_moeda + fields.entrada) ---> x
 
-      console.log('fields');
-      console.log(fields);
-      console.log('moeda_t');
-      console.log(moeda_t);
-      console.log('data_table[moeda_t]');
-      console.log(data_table[moeda_t]);
       if (/BRL.*/.test(moeda)) {
         data_table[moeda_t].total_investido += fields.saida;
+        data_table[moeda_t].t_investido += fields.saida;
+        if (fields.transacao == 'Fee') {
+          data_table[moeda_t].total_taxas += fields.saida;
+          data_table[moeda_t].t_investido -= fields.saida;
+        }
+
         data_table[moeda_t].total_retorno += fields.entrada;
 
         data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'valor']);
@@ -258,8 +272,6 @@ export default function FileAnalises() {
           }
           data_table[moeda_t].qtd_moeda -= fields.saida;
         }
-        console.log('novo val_medio');
-        console.log(aux_val_m);
 
         fields.val_medio = aux_val_m;
         data_table[moeda_t].val_medio = fields.val_medio;
@@ -267,16 +279,22 @@ export default function FileAnalises() {
         fields.balanco_qtd = data_table[moeda_t].qtd_moeda;
         if (fields.transacao != 'Fee') {
           data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
+        } else {
+          var val_taxa = (fields.saida * fields.val_trans);
+          console.log('val_taxa');
+          console.log(val_taxa);
+          data_table[moeda_t].total_taxas += val_taxa;
+          data_table[moeda_t].t_investido -= val_taxa;
         }
-        console.log('fields');
-        console.log(fields);
-        console.log('data_table[moeda_t]');
-        console.log(data_table[moeda_t]);
+        // console.log('fields');
+        // console.log(fields);
+        // console.log('data_table[moeda_t]');
+        // console.log(data_table[moeda_t]);
         data_table[moeda].rows.push(fields);
       }
     }
-    console.log('\nfim analise: ---------------------');
-    console.log(data_table);
+    console.log('fim analise: ---------------------');
+    //console.log(data_table);
     toast.success("Análise concluida!");
     setTimeout(() => {
       setIsLoading(false);
@@ -376,7 +394,15 @@ export default function FileAnalises() {
               </Grid>
               <Grid item key={dat + '_GT21_' + rowIndex} xs={4} md={4} sx={{ textAlign: "left", }}>
                 <Typography key={dat + '_T21_' + rowIndex} >
-                  Investido: {formatValue(data[dat].total_investido)}<br/>
+                  <Tooltip title={<>
+                    <div style={{ whiteSpace: 'pre-line' }}>
+                      Investido: {formatValue(data[dat].t_investido)}<br/>
+                      Taxas: {formatValue(data[dat].total_taxas)}<br/>
+                      Cash-back: {formatValue(data[dat].total_cash_back)}<br/>
+                      Total: {formatValue(data[dat].total_investido)}<br/>
+                    </div></>}>
+                    Investido: {formatValue(data[dat].total_investido)}<br/>
+                  </Tooltip>
                   Retorno: {formatValue(data[dat].total_retorno)}
                 </Typography>
               </Grid>
