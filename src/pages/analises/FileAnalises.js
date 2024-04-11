@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import ExcelImport from "../Spreadsheet/Tables/ExcelImport";
 import "./style.css";
 import { green } from "@mui/material/colors";
+import ChartLine from "./ChartLine";
 
 export default function FileAnalises() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -18,15 +19,14 @@ export default function FileAnalises() {
   const calcMediaPonderada = (moeda) => {
     /*
       Mp = ((p1 * x1) + (p2 * x2) + (pn * xn)) / (p1 + p2 + pn)
-      
+
       Mp: Média aritmética ponderada
       p1, p2,..., pn: pesos
       x1, x2,...,xn: valores dos dados
-    */
-   /*
+
       Mp = (valor + ((p1 * x1) + (p2 * x2) + (pn * xn))) / (qtd + ( p1 + p2 + pn))
+
       Mp = (valor - ((p1 * x1) + (p2 * x2) + (pn * xn))) / (qtd - ( p1 + p2 + pn))
-    
     */
   };
 
@@ -59,6 +59,13 @@ export default function FileAnalises() {
     return aux_val_f1;
   }
 
+  // Custom date comparison function considering both date and time
+  function compareDates(dateStr1, dateStr2) {
+    const date1 = new Date(dateStr1)
+    const date2 = new Date(dateStr2)
+    return date1 - date2
+  }
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     //console.log(file);
@@ -77,7 +84,9 @@ export default function FileAnalises() {
   const handleAnalises = (jsonData) => {
     setIsLoading(true);
     setTimeout(() => {
-      handleAnalises2(jsonData)
+      const aux_data = jsonData.sort((a, b) => a[1] - b[1]);
+
+      handleAnalises2(aux_data);
     }, 200);
   };
   const handleAnalises2 = (jsonData) => {
@@ -120,6 +129,7 @@ export default function FileAnalises() {
       if (!arr_datas[data]) {
         arr_datas[data] = {
           name: data,
+          data: aux_data,
           rows: [],
           moeda: '',
           brl: 0,
@@ -146,6 +156,7 @@ export default function FileAnalises() {
       fields = {
         id: line[1],
         data: dayjs(aux_data).format('DD/MM/YYYY HH:mm'),
+        data_nf: aux_data,
         transacao: line[2],
         entrada: parseFloat(line[7] || '0'),
         saida: parseFloat(line[8] || '0'),
@@ -281,15 +292,9 @@ export default function FileAnalises() {
           data_table[moeda_t].media.push([(fields.entrada || fields.saida), 'qtd']);
         } else {
           var val_taxa = (fields.saida * fields.val_trans);
-          console.log('val_taxa');
-          console.log(val_taxa);
           data_table[moeda_t].total_taxas += val_taxa;
           data_table[moeda_t].t_investido -= val_taxa;
         }
-        // console.log('fields');
-        // console.log(fields);
-        // console.log('data_table[moeda_t]');
-        // console.log(data_table[moeda_t]);
         data_table[moeda].rows.push(fields);
       }
     }
@@ -341,7 +346,7 @@ export default function FileAnalises() {
                   <strong>. . .</strong>
                 </Typography>
                 <Typography variant="body1">
-                  {selectedFile !== null ? `Arquivo selecionado: ${selectedFile.name}` : "Nenhum arquivo selecionado."}
+                  {selectedFile !== null ? <>Arquivo selecionado:<br/> {selectedFile.name}</> : "Nenhum arquivo selecionado."}
                 </Typography>
               </div>
             </Grid>
@@ -377,7 +382,7 @@ export default function FileAnalises() {
       </>) : (<>
         {Object.keys(data).map((dat, rowIndex) => (<>
           <Divider sx={{ mt: 3, mb: 1, borderColor: green[700] }} />
-          <Grid container key={dat + '_G1_' + rowIndex} sx={{ padding: 1, maxWidth: '90%' , maxHeight: '400px', overflow: 'auto' }} >
+          <Grid container key={dat + '_G1_' + rowIndex} sx={{ padding: 1, maxWidth: '95%', overflow: 'auto' }} >
             <Grid container key={dat + '_G2_' + rowIndex} spacing={3}>
               <Grid item key={dat + '_GT0_' + rowIndex} xs={1} md={1}>
               </Grid>
@@ -407,28 +412,38 @@ export default function FileAnalises() {
                 </Typography>
               </Grid>
             </Grid>
-            <Grid item key={dat + '_G3_' + rowIndex} xs={1} md={1}/>
-            <Grid item key={dat + '_G4_' + rowIndex} xs={10} md={10}>
-              <TableContainer component={Paper}>
-                <Table aria-label="simple table">
+            <Grid container key={dat + '_G2_' + rowIndex} spacing={3} >
+              <Grid item key={dat + '_G3_' + rowIndex} xs={0.5} md={0.5}/>
+              <Grid item key={dat + '_G4_' + rowIndex} xs={11.5} md={11.5}>
+                <Table aria-label={dat + "-table"} size={'small'}>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Tipos</TableCell>
-                      <TableCell align="center">Data</TableCell>
+                      <TableCell align="center" width={60}>Tipo</TableCell>
+                      <TableCell align="center" width={90}>Data</TableCell>
                       <TableCell align="center">Entrada</TableCell>
                       <TableCell align="center">Saída</TableCell>
+                      {dat != 'BRL' && <><TableCell align="center">Valor</TableCell></>}
                       {dat != 'BRL' && <><TableCell align="center">Val. Transação</TableCell></>}
                       {dat != 'BRL' && <><TableCell align="center">Val. Medio</TableCell></>}
-                      <TableCell align="center">Saldo</TableCell>
+                      <TableCell align="center">Saldo Qtd.</TableCell>
                     </TableRow>
                   </TableHead>
+                </Table>
+              </Grid>
+            </Grid>
+            <Grid item key={dat + '_G3_' + rowIndex} xs={0.5} md={0.5}/>
+            <Grid item key={dat + '_G4_' + rowIndex} xs={11.5} md={11.5}>
+              <TableContainer component={Paper} sx={{maxHeight: '450px'}}>
+                <Table aria-label={dat + "-table2"} size={'small'}>
                   <TableBody>
                     {(data[dat].rows).map((line, index) => (
-                      <TableRow key={dat + '_tr_' + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell align="right">{line.tipo}</TableCell>
-                        <TableCell align="right">{line.data}</TableCell>
+                      <TableRow key={dat + '_tr_' + index} sx={{ '&:last-child td, &:last-child th': { border: 0 }, 
+                        backgroundColor: index%2 == 0 ? "#FFF" :'var(--muidocs-palette-primary-50, #EBF5FF)' }}>
+                        <TableCell align="left" width={60}>{line.tipo}</TableCell>
+                        <TableCell align="center" width={90}>{line.data}</TableCell>
                         <TableCell align="right">{line.entrada}</TableCell>
                         <TableCell align="right">{line.saida}</TableCell>
+                        {dat != 'BRL' && <><TableCell align="right">{formatValue((line.entrada || line.saida) * line.val_trans)}</TableCell></>}
                         {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_trans)}</TableCell></>}
                         {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_medio)}</TableCell></>}
                         <TableCell align="right" title={"Aprox: " + line.balanco_qtd}>{line.balanco}</TableCell>
@@ -438,6 +453,9 @@ export default function FileAnalises() {
                 </Table>
               </TableContainer>
             </Grid>
+          </Grid>
+          <Grid container key={dat + '_GR_' + rowIndex}>
+            <ChartLine data={data[dat]} />
           </Grid>
         </>))}
       </> )}
