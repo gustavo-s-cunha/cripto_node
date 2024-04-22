@@ -1,15 +1,11 @@
 # cripto_node
-projeto em node
-
+projeto em node - react
 
 
 # Getting Started with Create React App
-
-https://askubuntu.com/questions/1152570/npm-cant-find-module-semver-error-in-ubuntu-19-04
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Available Scripts:
 
 In the project directory, you can run:
 
