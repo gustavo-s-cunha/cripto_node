@@ -9,6 +9,7 @@ import ExcelImport from "../Spreadsheet/Tables/ExcelImport";
 import "./style.css";
 import { green } from "@mui/material/colors";
 import ChartLine from "./ChartLine";
+import DownloadButton from "../Spreadsheet/Tables/DownloadButton";
 
 export default function FileAnalises() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -363,6 +364,15 @@ export default function FileAnalises() {
                   <ListItemText 
                     primary="Exemplo:" 
                     secondary={"Sob demanda Transaction de 2021-01-05 to 2024-03-27.csv"} />
+                </ListItem>
+              </Grid>
+              <Grid item xs={12} sm={12}>
+                <ListItem>
+                  <ListItemText 
+                    primary="Planilha de Exemplo:" 
+                    secondary={(<>
+                      <DownloadButton filename={'plan_exemple.csv'} fileUrl={'./'}/>
+                    </>)} />
                 </ListItem>
               </Grid>
             </Grid>
