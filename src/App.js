@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import Router from "./routes/Router";
 import 'react-toastify/dist/ReactToastify.css';
+import './style.scss'
 import { ToastContainer } from "react-toastify";
 
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Container, Grid, Paper, Typography } from "@mui/material";
+import { expandAndFadeblack } from "../../components/Loader/animationKeyFrames";
 
 export default function Main() {
   return (
@@ -29,7 +30,8 @@ export default function Main() {
             <div style={{ display: "flex", flexDirection: "column" }}>
               <Link to="/analises" style={{ textDecoration: 'none' }}>
                 {" "}
-                <Button variant="contained" color="success" size="large" sx={{ mt: 2 }} >
+                <Button variant="contained" color="success" size="large" id="button_pros_analise"
+                  sx={{ mt: 1, animation: `${expandAndFadeblack} 4s linear infinite` }}>
                   Prosseguir para análise
                 </Button>
               </Link>

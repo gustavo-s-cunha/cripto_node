@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { Box, Button, Divider, Grid, ListItem, ListItemText, Paper, Tooltip} from "@mui/material";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, } from "@mui/material";
+import { Box, Button, Grid, ListItem, ListItemText, Paper, Typography, } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import dayjs from "dayjs";
 
-import ExcelImport from "../Spreadsheet/Tables/ExcelImport";
-import "./style.css";
-import { green } from "@mui/material/colors";
-import ChartLine from "./ChartLine";
 import DownloadButton from "../Spreadsheet/Tables/DownloadButton";
+import FileHtml from "./FileHtml";
 
 export default function FileAnalises() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -49,17 +45,6 @@ export default function FileAnalises() {
     return x;
   }
 
-  function formatValue(value) {
-    var aux_value = value;
-    if (typeof value == 'string') {
-      aux_value = parseFloat(value);
-    }
-    var aux_val = aux_value.toFixed(2);
-    var aux_val_f1 = aux_val.replace('.', ',');
-
-    return aux_val_f1;
-  }
-
   // Custom date comparison function considering both date and time
   function compareDates(dateStr1, dateStr2) {
     const date1 = new Date(dateStr1)
@@ -85,12 +70,14 @@ export default function FileAnalises() {
   const handleAnalises = (jsonData) => {
     setIsLoading(true);
     setTimeout(() => {
-      const aux_data = jsonData.sort((a, b) => a[1] - b[1]);
+      const aux_data = jsonData.sort((a, b) => {
+        return compareDates(a[3], b[3])
+      });
 
-      handleAnalises2(aux_data);
+      handleAnaliseData(aux_data);
     }, 200);
   };
-  const handleAnalises2 = (jsonData) => {
+  const handleAnaliseData = (jsonData) => {
     //setIsLoading(true);
     //console.log(jsonData);
 
@@ -312,7 +299,12 @@ export default function FileAnalises() {
     event.preventDefault();
   };
 
-  //<Container component="main" /*maxWidth="lg"*/ sx={{ mt: 0, maxWidth: '100%' }} id="conteiner_main">
+  const obj_fn = {
+    handleAnalises: handleAnalises,
+    selectedFile: selectedFile,
+    isLoading: isLoading,
+  };
+
   return ( <>
     <div className="content-wrapper bg-white">
       <Paper variant="" sx={{ my: { xs: 1, md: 1 }, p: { xs: 2, md: 1 } }} style={{ paddingTop: "16px" }} >
@@ -379,96 +371,7 @@ export default function FileAnalises() {
           </Grid>
         </Box>
       </Paper>
-      {selectedFile !== null && (
-        <ExcelImport file={selectedFile} onImport={handleAnalises} />
-      )}
-      {isLoading ? ( <>
-        <img
-          src="/assets/loader.svg"
-          height={100}
-          style={{ marginTop: "2rem" }}
-          alt="loader"
-        /> 
-      </>) : (<>
-        {Object.keys(data).map((dat, rowIndex) => (<>
-          <Divider sx={{ mt: 3, mb: 1, borderColor: green[700] }} />
-          <Grid container key={dat + '_G1_' + rowIndex} sx={{ padding: 1, maxWidth: '95%', overflow: 'auto' }} >
-            <Grid container key={dat + '_G2_' + rowIndex} spacing={3}>
-              <Grid item key={dat + '_GT0_' + rowIndex} xs={1} md={1}>
-              </Grid>
-              <Grid item key={dat + '_GT_' + rowIndex} xs={2} md={2}>
-                <Typography key={dat + '_T_' + rowIndex} >
-                  <strong>{dat}</strong>
-                </Typography>
-              </Grid>
-              <Grid item key={dat + '_GT2_' + rowIndex} xs={4} md={4} sx={{ textAlign: "left", }}>
-                <Typography key={dat + '_T2_' + rowIndex} >
-                  Qtd: {data[dat].qtd_moeda}<br/>
-                  Media: {formatValue(data[dat].val_medio)}
-                </Typography>
-              </Grid>
-              <Grid item key={dat + '_GT21_' + rowIndex} xs={4} md={4} sx={{ textAlign: "left", }}>
-                <Typography key={dat + '_T21_' + rowIndex} >
-                  <Tooltip title={<>
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      Investido: {formatValue(data[dat].t_investido)}<br/>
-                      Taxas: {formatValue(data[dat].total_taxas)}<br/>
-                      Cash-back: {formatValue(data[dat].total_cash_back)}<br/>
-                      Total: {formatValue(data[dat].total_investido)}<br/>
-                    </div></>}>
-                    Investido: {formatValue(data[dat].total_investido)}<br/>
-                  </Tooltip>
-                  Retorno: {formatValue(data[dat].total_retorno)}
-                </Typography>
-              </Grid>
-            </Grid>
-            <Grid container key={dat + '_G2_' + rowIndex} spacing={3} >
-              <Grid item key={dat + '_G3_' + rowIndex} xs={0.5} md={0.5}/>
-              <Grid item key={dat + '_G4_' + rowIndex} xs={11.5} md={11.5}>
-                <Table aria-label={dat + "-table"} size={'small'}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="center" width={60}>Tipo</TableCell>
-                      <TableCell align="center" width={90}>Data</TableCell>
-                      <TableCell align="center">Entrada</TableCell>
-                      <TableCell align="center">Saída</TableCell>
-                      {dat != 'BRL' && <><TableCell align="center">Valor</TableCell></>}
-                      {dat != 'BRL' && <><TableCell align="center">Val. Transação</TableCell></>}
-                      {dat != 'BRL' && <><TableCell align="center">Val. Medio</TableCell></>}
-                      <TableCell align="center">Saldo Qtd.</TableCell>
-                    </TableRow>
-                  </TableHead>
-                </Table>
-              </Grid>
-            </Grid>
-            <Grid item key={dat + '_G3_' + rowIndex} xs={0.5} md={0.5}/>
-            <Grid item key={dat + '_G4_' + rowIndex} xs={11.5} md={11.5}>
-              <TableContainer component={Paper} sx={{maxHeight: '450px'}}>
-                <Table aria-label={dat + "-table2"} size={'small'}>
-                  <TableBody>
-                    {(data[dat].rows).map((line, index) => (
-                      <TableRow key={dat + '_tr_' + index} sx={{ '&:last-child td, &:last-child th': { border: 0 }, 
-                        backgroundColor: index%2 == 0 ? "#FFF" :'var(--muidocs-palette-primary-50, #EBF5FF)' }}>
-                        <TableCell align="left" width={60}>{line.tipo}</TableCell>
-                        <TableCell align="center" width={90}>{line.data}</TableCell>
-                        <TableCell align="right">{line.entrada}</TableCell>
-                        <TableCell align="right">{line.saida}</TableCell>
-                        {dat != 'BRL' && <><TableCell align="right">{formatValue((line.entrada || line.saida) * line.val_trans)}</TableCell></>}
-                        {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_trans)}</TableCell></>}
-                        {dat != 'BRL' && <><TableCell align="right">{formatValue(line.val_medio)}</TableCell></>}
-                        <TableCell align="right" title={"Aprox: " + line.balanco_qtd}>{line.balanco}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Grid>
-          </Grid>
-          <Grid container key={dat + '_GR_' + rowIndex}>
-            <ChartLine data={data[dat]} />
-          </Grid>
-        </>))}
-      </> )}
+      <FileHtml data={data} obj_fn={obj_fn} />
     </div>
   </>);
 }

@@ -1,0 +1,87 @@
+// styles.scss
+@use "sass:math";
+
+$background: #efefef;
+
+$color-blue: #006ac6;
+$color-blue-l: #93cbf078;
+$color-green: #2e7d32;
+$color-green-l: #e8f5e9;
+$color-yellow: #fab700;
+$color-grey: #75787b;
+$color-grey-l: #e0e0e0;
+
+
+$bord-color: #F1F1F1;
+
+.table-coins {
+  width: 100%;
+  thead {
+    border-bottom: 2px solid $color-blue;
+    background-color: $color-grey-l;
+    th {
+      text-transform: uppercase;
+      text-align: center;
+      padding: 3px 7px 3px 10px;
+      color: $color-green;
+      border: 1px solid $bord-color;
+    }
+  }
+  tbody {
+    tr {
+      border-bottom: 1px solid $bord-color;
+      td {
+        padding: 3px 7px 3px 10px;
+        border: 1px solid $bord-color;
+      }
+      th {
+        padding-left: 5px;
+        border: 1px solid $bord-color;
+      }
+      :nth-last-child(-n+1) {
+        border: 0;
+      }
+    }
+    :hover {
+      background-color: $color-blue-l !important;
+    }
+    tr:nth-child(2n) {
+      background-color: $color-green-l;
+    }
+  }
+}
+
+.drop-container {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px dashed #555;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+}
+
+.drop-container:hover {
+  background: $background;
+  border-color: #111;
+}
+
+input::file-selector-button {
+  background-color: $color-green;
+  color: $background;
+  padding: 0.35rem;
+  font-weight: bold;
+  font-size: 0.8rem;
+  border: none;
+  outline: 0;
+  border-radius: 3px;
+  box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+    0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}

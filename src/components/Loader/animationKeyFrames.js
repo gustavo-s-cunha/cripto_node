@@ -30,33 +30,33 @@ export const expandAndFadeLine = keyframes`
     opacity: 1;
   }
 `
-
+/* Cor #115c34 */
 export const expandAndFadeDarkGreen = keyframes`
   0% {
-    box-shadow: 0 0 0px 0px rgba(17, 92, 52, 0.2); /* Cor #115c34 */
+    box-shadow: 0 0 0px 0px rgba(17, 92, 52, 0.2);
     opacity: 1;
   }
   50% {
-    box-shadow: 0 0 0px 5px rgba(17, 92, 52, 0.5); /* Cor #115c34 */
+    box-shadow: 0 0 0px 5px rgba(17, 92, 52, 0.5);
     opacity: 0.7;
   }
   100% {
-    box-shadow: 0 0 0px 10px rgba(17, 92, 52, 0); /* Cor #115c34 */
+    box-shadow: 0 0 0px 10px rgba(17, 92, 52, 0);
     opacity: 1;
   }
 `
 
 export const expandAndFadeblack = keyframes`
   0% {
-    box-shadow: 0 0 0px 0px rgba(0, 0, 0, 0.2); /* Mudança da cor de verde para preto */
+    box-shadow: 0 0 0px 0px rgba(0, 0, 0, 0.2);
     opacity: 1;
   }
   50% {
-    box-shadow: 0 0 0px 5px rgba(0, 0, 0, 0.5); /* Mudança da cor de verde para preto */
+    box-shadow: 0 0 0px 5px rgba(0, 0, 0, 0.5);
     opacity: 0.7;
   }
   100% {
-    box-shadow: 0 0 0px 10px rgba(0, 0, 0, 0); /* Mudança da cor de verde para preto */
+    box-shadow: 0 0 0px 10px rgba(0, 0, 0, 0);
     opacity: 1;
   }
 `
