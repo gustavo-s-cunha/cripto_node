@@ -49,20 +49,20 @@ export default function FileHtml({ data, obj_fn }) {
                 </Grid>
                 <Grid item key={dat + '_GT3_' + rowIndex} xs={12} md={5} sx={{ textAlign: "left", }}>
                   <Typography key={dat + '_T3_' + rowIndex} >
-                    <Tooltip key={dat + '_Tp3_' + rowIndex} title={<>
+                    <Tooltip key={dat + '_Tp3_' + rowIndex} title={
                       <div style={{ whiteSpace: 'pre-line' }}>
                         Investido: {formatValue(data[dat].t_investido)}<br/>
                         Taxas: {formatValue(data[dat].total_taxas)}<br/>
                         Cash-back: {formatValue(data[dat].total_cash_back)}<br/>
                         Total: {formatValue(data[dat].total_investido)}<br/>
-                      </div></>}>
+                      </div>}>
                       Investido: {formatValue(data[dat].total_investido)}<br/>
                     </Tooltip>
                     Retorno: {formatValue(data[dat].total_retorno)}
                   </Typography>
                 </Grid>
               </Grid>
-              <Grid container key={dat + '_G4_' + rowIndex} xs={12} md={12} style={{ marginTop: '8px' }}>
+              <Grid container key={dat + '_G4_' + rowIndex} style={{ marginTop: '8px' }}>
                 <Table aria-label={dat + "-table"} size={'small'} className="table-coins">
                   <TableHead>
                     <TableRow key={dat + '_Th1_' + rowIndex}>

@@ -347,15 +347,15 @@ export default function FileAnalises() {
               <Grid item xs={12} sm={12}>
                 <ListItem>
                   <ListItemText 
-                    primary="A tabela geralmente tem o nome de:"
-                    secondary={"Sob demanda Transaction de <data de> to <data até>.csv"} />
+                    primary="Relatório de transações:"
+                    secondary={"Menu -> Relatórios -> Ordens executadas -> Selecione os períodos -> Download"} />
                 </ListItem>
               </Grid>
               <Grid item xs={12} sm={12}>
                 <ListItem>
                   <ListItemText 
-                    primary="Exemplo:" 
-                    secondary={"Sob demanda Transaction de 2021-01-05 to 2024-03-27.csv"} />
+                    primary="Exemplo de saída:" 
+                    secondary={"Sob demanda Transaction de 2021-01-01 to 2024-08-01.csv"} />
                 </ListItem>
               </Grid>
               <Grid item xs={12} sm={12}>
